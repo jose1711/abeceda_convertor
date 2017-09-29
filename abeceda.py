@@ -24,8 +24,8 @@ Spracovanie vychadza z MS Word makier od p. Stanislava Filu
 a jeho poznamok, ktore mi laskavo spristupnil.
 
 Zoznam a vyznam specialnych znakov:
-⌐ - medzera pred velkymi pismenami s bruskom na zaciatku riadku
-⌂ - medzera pred malymi pismenami s bruskom na zaciatku riadku
+ņ - medzera pred velkymi pismenami s bruskom (okrem P) na zaciatku riadku
+ŉ - medzera pred malymi pismenami s bruskom a P na zaciatku riadku
 & - dotahova ciarka za koncom slova
 ¤ - vseobecna spojka
 × - spojka za P
@@ -66,12 +66,12 @@ velke = 'BDĎFIÍOÓÖŐÔSŠTŤVW'
 male1 = 'mnňńvwyýzžźż'
 male2 = 'beéěęfhiíjklĺľłprŕřsšśtťżuúůüű'
 zavinacove_male = 'aáäcčdďgoóôöőq'
-velke_bruskate = "AÁÄĄBCČĆEÉĚĘFGHIÍJKLĽĹŁOÓÔÖŐPQRŘŔTŤUÚŮÜŰVWXYÝZŽŹŻ!#$%&()*+,-/:;<=>?@[\]_{|}~°––—€"
+velke_bruskate = "AÁÄĄBCČĆEÉĚĘFGHIÍJKLĽĹŁOÓÔÖŐQRŘŔTŤUÚŮÜŰVWXYÝZŽŹŻ!#$%&()*+,-/:;<=>?@[\]_{|}~°––—€"
 male_bruskate = "aáäącčćdďgłńoóôöőq‹›ŏōŌ"
 P = 'P'
 x = 'x'
 s = 's'
-ss = 'š'
+ss = '[š|ś]'
 sirokes = '©s'
 sirokess = '©š'
 sirokes2 = 's¤'
@@ -113,7 +113,7 @@ rx = re.compile('[{0}](?=[{1}])'.format(znaky, x))
 # s + obecna spojka
 rs = re.compile(s)
 
-# š + obecna spojka
+# š/ś + obecna spojka
 rss = re.compile(ss)
 
 # siroke s na zaciatku slova
@@ -153,8 +153,8 @@ rdotiahni = re.compile('([{0}])(?=[{1}])'.format(dotiahni,
 # minimedzera pred velke bruskate pismena na zaciatku riadku
 rvelke_bruskate = re.compile('( |^)([{0}])'.format(velke_bruskate), re.M)
 
-# minimedzera pred male bruskate pismena na zaciatku riadku
-rmale_bruskate = re.compile('( |^)([{0}])'.format(male_bruskate), re.M)
+# minimedzera pred male bruskate pismena a velke P na zaciatku riadku
+rmale_bruskate = re.compile('( |^)([{0}])'.format(male_bruskate + 'P'), re.M)
 
 
 def convert(retazec, dotahovat=False, zarovnat=False):
@@ -179,8 +179,8 @@ def convert(retazec, dotahovat=False, zarovnat=False):
     if dotahovat:
         retazec = re.sub(rdotiahni, lambda n: n.group(0) + '&', retazec)
     if zarovnat:
-        retazec = re.sub(rvelke_bruskate, lambda n: n.group(1) + '⌐' + n.group(2), retazec)
-        retazec = re.sub(rmale_bruskate, lambda n: n.group(1) + '⌂' + n.group(2), retazec)
+        retazec = re.sub(rvelke_bruskate, lambda n: n.group(1) + 'ņ' + n.group(2), retazec)
+        retazec = re.sub(rmale_bruskate, lambda n: n.group(1) + 'ŉ' + n.group(2), retazec)
     return retazec
 
 
@@ -246,7 +246,7 @@ if args.g:
     labelout.pack()
     textout = Text(tk, width=80, height=15, font=('Arial', 10))
     textout.pack()
-    labelver = Label(tk, text='v0.9.0')
+    labelver = Label(tk, text='v0.9.1')
     labelver.pack(side=RIGHT)
     tk.mainloop()
 else:
