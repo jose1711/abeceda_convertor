@@ -1,0 +1,6 @@
+Package: abeceda
+Version: 0.9.8-1
+Maintainer: Jose Riha
+Architecture: all
+Description: Hand-written font Abeceda_v4.ttf and convertor from a plaintext
+Depends: python3-tk

@@ -1,0 +1,2 @@
+fc-cache
+gtk-update-icon-cache -t /usr/share/icons/hicolor
