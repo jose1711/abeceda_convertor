@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Abeceda Convertor
+Name[sk]=Abeceda konvertor
+Name[cs]=Abeceda konvertor
+Name[hu]=Ábécé átalakító
+Exec=/usr/bin/abeceda.py -g
+Type=Application
+Terminal=false
+Icon=abeceda_convertor
+X-KDE-StartupNotify=false
+Categories=Office;Convertor;
