@@ -6,6 +6,14 @@ pouziva font pisaneho pisma abeceda_v4.ttf na
 vykreslenie dotahovych a nabehovych ciar, spojok
 a pod.
 
+Spracovanie vychadza z MS Word makier od p. Stanislava Filu
+a jeho poznamok, ktore mi laskavo spristupnil.
+
+Panovi Filovi by som tiez rad podakoval za velku pomoc
+pri testovani tohto skriptu i jeho pripomienkovani. Samotny
+font i navody na pouzitie tohto skriptu i makier pre MS Word
+najdete na http://www.cpppap.svsbb.sk/files/im_font.html
+
 Pouzitie:
  -a                 Zarovnať začiatky riadkov
  -f vstupny_subor   Súbor s textom na konverziu
@@ -20,8 +28,6 @@ Priklady spustenia:
  echo 'Adam v škole nesedel, abecedu nevedel' | abeceda.py
  abeceda.py -g
 
-Spracovanie vychadza z MS Word makier od p. Stanislava Filu
-a jeho poznamok, ktore mi laskavo spristupnil.
 
 Zoznam a vyznam specialnych znakov:
 ņ - medzera pred velkymi pismenami s bruskom (okrem P) na zaciatku riadku
@@ -44,7 +50,8 @@ import re
 import sys
 import os
 import argparse
-from tkinter import Tk, Text, Button, BooleanVar, Checkbutton, Label, Frame, LEFT, RIGHT
+from tkinter import Tk, Text, Button, BooleanVar, Checkbutton, Label, Frame, \
+                    LEFT, RIGHT, BOTTOM
 
 parser = argparse.ArgumentParser(description='Upraví text pre písmo Abeceda_v4.ttf')
 parser.add_argument('-a', action='store_true',
@@ -62,7 +69,7 @@ args = parser.parse_args()
 if os.name == 'nt':
     args.g = True
 
-velke = 'BDĎFIÍOÓÖŐÔSŠTŤVW'
+velke = 'BDĎFIÍOÓÖŐÔSŚŠTŤVW'
 male1 = 'mnňńvwyýzžźż'
 male2 = 'beéěęfhiíjklĺľłprŕřsšśtťżuúůüű'
 zavinacove_male = 'aáäcčdďgoóôöőq'
@@ -209,6 +216,10 @@ if args.g:
         tk.clipboard_clear()
         tk.clipboard_append(convert_and_display())
 
+    def clear_all():
+        textin.delete(0.0, 9999.0)
+        convert_and_display()
+
     tk = Tk()
     tk.title("Abeceda_v4 konvertor")
     labelin = Label(tk, text='Vstupný text')
@@ -220,13 +231,18 @@ if args.g:
     abeceda_font = BooleanVar()
     options_frame = Frame(tk)
     options_frame.pack()
-    buttons_frame = Frame(tk)
-    buttons_frame.pack()
-    button1 = Button(buttons_frame, text='Previesť', command=convert_and_display)
-    button2 = Button(buttons_frame, text='Kopírovať do schránky',
+    left_buttons_frame = Frame(tk)
+    left_buttons_frame.pack()
+    right_buttons_frame = Frame(left_buttons_frame)
+    right_buttons_frame.pack(side=BOTTOM)
+    button1 = Button(left_buttons_frame, text='Previesť', command=convert_and_display)
+    button2 = Button(left_buttons_frame, text='Kopírovať do schránky',
                      command=copy_to_clipboard)
+    button3 = Button(right_buttons_frame, text='Vyčistiť',
+                     command=clear_all)
     button1.pack(side=LEFT)
-    button2.pack(side=RIGHT)
+    button2.pack(side=LEFT)
+    button3.pack(side=RIGHT)
     dotahovat_btn = Checkbutton(options_frame, text='Doťahovať písmená',
                                 variable=dotahovat, command=dotahovat_btn_cback)
     dotahovat_btn.select()
@@ -246,7 +262,7 @@ if args.g:
     labelout.pack()
     textout = Text(tk, width=80, height=15, font=('Arial', 10))
     textout.pack()
-    labelver = Label(tk, text='v0.9.1')
+    labelver = Label(tk, text='v0.9.2')
     labelver.pack(side=RIGHT)
     tk.mainloop()
 else:
