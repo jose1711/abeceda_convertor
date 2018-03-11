@@ -16,10 +16,13 @@ najdete na http://www.cpppap.svsbb.sk/files/im_font.html
 
 Pouzitie:
  -a                 Zarovnať začiatky riadkov
- -f vstupny_subor   Súbor s textom na konverziu
- -o vystupny_subor  Súbor, kam pôjde výstup (nedefinovaný = obrazovka)
  -d                 Doťahovať konce písmen
+ -f vstupny_subor   Súbor s textom na konverziu
  -g                 Zapnúť GUI
+ -o vystupny_subor  Súbor, kam pôjde výstup (nedefinovaný = obrazovka)
+ -p                 Použiť české p
+ -u                 Použiť všade úzke o
+ -z                 Zmeniť z za sľučkové
 
 Ak nie je zadany vstupny subor ani rezim GUI, je pouzity standardny
 vstup.
@@ -44,6 +47,8 @@ Zoznam a vyznam specialnych znakov:
 ® - gš, jš, qš, yš na konci slov
 ¨ - sn, sv, šn, šv + vseobecna spojka
 Ç,‹,ç,î,›,ŏ,ō - skratene verzie b, o, v, w, ó, ô, ö
+Î - ceske p
+chr(8355), chr(8710), chr(8706), chr(8225) - sluckove varianty z
 
 """
 import re
@@ -56,16 +61,22 @@ from tkinter import Tk, Text, Button, BooleanVar, Checkbutton, Label, Frame, \
 parser = argparse.ArgumentParser(description='Upraví text pre písmo Abeceda_v4.ttf')
 parser.add_argument('-a', action='store_true',
                     help='Zarovnať začiatky riadkov')
-parser.add_argument('-f', nargs=1, metavar='vstupny_subor',
-                    help='Súbor s textom na konverziu')
-parser.add_argument('-o', nargs=1, metavar='vystupny_subor',
-                    help='Súbor, kam pôjde výstup (nedefinovaný = obrazovka)')
 parser.add_argument('-d', action='store_true',
                     help='Doťahovať konce písmen')
+parser.add_argument('-f', nargs=1, metavar='vstupny_subor',
+                    help='Súbor s textom na konverziu')
 parser.add_argument('-g', action='store_true',
                     help='Zapnúť GUI')
+parser.add_argument('-o', nargs=1, metavar='vystupny_subor',
+                    help='Súbor, kam pôjde výstup (nedefinovaný = obrazovka)')
+parser.add_argument('-p', action='store_true',
+                    help='České p')
+parser.add_argument('-u', action='store_true',
+                    help='Vždy použiť úzke o')
+parser.add_argument('-z', action='store_true',
+                    help='Zmeniť z za sľučkové')
 args = parser.parse_args()
-# vo Windowse vzdy zobraz okno
+# vo Windows vzdy zobraz okno
 if os.name == 'nt':
     args.g = True
 
@@ -78,7 +89,7 @@ male_bruskate = "aáäącčćdďgłńoóôöőq‹›ŏōŌ"
 P = 'P'
 x = 'x'
 s = 's'
-ss = '[š|ś]'
+ss = '[šś]'
 sirokes = '©s'
 sirokess = '©š'
 sirokes2 = 's¤'
@@ -92,6 +103,7 @@ dotiahni += 'AÁÄĄCČĆEÉĚĘGHJKLĽĹŁMNŇŃQRŘŔUÚŮÜŰXYÝZŽŹĆ'
 cisla = '0123456780'
 gsjs = 'GgJjQqYyÝý'
 snsv = 'nv'
+# uzsie verzie pismen pri spojeniach bm, bn, om..
 nahrady = {'b': 'Ç',
            'o': '‹',
            'v': 'ç',
@@ -101,6 +113,13 @@ nahrady = {'b': 'Ç',
            'ö': 'ō',
            'ő': 'Ō',
            }
+
+nahrady_o = {'o': '‹',
+             'ó': '›',
+             'ô': 'ŏ',
+             chr(148): 'ō',
+             chr(139): 'Ō',
+            }
 
 # velke osamotene pismena
 rvelke = re.compile('[{0}](?![{1}]|$)'.format(velke, znaky))
@@ -164,7 +183,8 @@ rvelke_bruskate = re.compile('( |^)([{0}])'.format(velke_bruskate), re.M)
 rmale_bruskate = re.compile('( |^)([{0}])'.format(male_bruskate + 'P'), re.M)
 
 
-def convert(retazec, dotahovat=False, zarovnat=False):
+def convert(retazec, dotahovat=False, zarovnat=False, ceske_p=False,
+            sluckove_z=False, uzke_o=False):
     retazec = re.sub(rvelke, lambda n: n.group(0) + '¤', retazec)
     retazec = re.sub(rP, lambda n: n.group(0) + '×', retazec)
     retazec = re.sub(rmale1, lambda n: n.group(1) + 'ß', retazec)
@@ -188,18 +208,38 @@ def convert(retazec, dotahovat=False, zarovnat=False):
     if zarovnat:
         retazec = re.sub(rvelke_bruskate, lambda n: n.group(1) + 'ņ' + n.group(2), retazec)
         retazec = re.sub(rmale_bruskate, lambda n: n.group(1) + 'ŉ' + n.group(2), retazec)
+    if sluckove_z:
+        retazec = retazec.replace('z', chr(8355))
+        retazec = retazec.replace('ž', chr(8710))
+        retazec = retazec.replace('ż', chr(8706))
+        retazec = retazec.replace('ź', chr(8225))
+    if ceske_p:
+        retazec = retazec.replace('p', 'Î')
+    if uzke_o:
+        retazec = re.sub('([{}])'.format(''.join(nahrady_o)), lambda n: nahrady[n.group(1)], retazec)
+
     return retazec
 
 
 if args.g:
     def convert_and_display():
         input = textin.get(0.0, 9999.0)
-        output = convert(input, dotahovat.get(), zarovnat.get())
+        output = convert(input, dotahovat.get(), zarovnat.get(),
+                         ceskep.get(), sluckovez.get(), uzkeo.get())
         textout.delete(0.0, 9999.0)
         textout.insert(0.0, output)
         return output
 
     def dotahovat_btn_cback():
+        convert_and_display()
+
+    def ceskep_btn_cback():
+        convert_and_display()
+
+    def sluckovez_btn_cback():
+        convert_and_display()
+
+    def uzkeo_btn_cback():
         convert_and_display()
 
     def font_btn_cback():
@@ -226,11 +266,18 @@ if args.g:
     labelin.pack()
     textin = Text(tk, width=80, height=15)
     textin.pack()
+
     dotahovat = BooleanVar()
     zarovnat = BooleanVar()
+    ceskep = BooleanVar()
+    sluckovez = BooleanVar()
+    uzkeo = BooleanVar()
     abeceda_font = BooleanVar()
+
     options_frame = Frame(tk)
     options_frame.pack()
+    options2_frame = Frame(tk)
+    options2_frame.pack()
     left_buttons_frame = Frame(tk)
     left_buttons_frame.pack()
     right_buttons_frame = Frame(left_buttons_frame)
@@ -256,13 +303,28 @@ if args.g:
     align_btn.deselect()
     align_btn.pack(side=LEFT)
 
+    ceskep_btn = Checkbutton(options2_frame, text='České "p"',
+                             variable=ceskep, command=ceskep_btn_cback)
+    ceskep_btn.deselect()
+    ceskep_btn.pack(side=LEFT)
+
+    zluckovez_btn = Checkbutton(options2_frame, text='Sľučkové "z"',
+                                variable=sluckovez, command=sluckovez_btn_cback)
+    zluckovez_btn.select()
+    zluckovez_btn.pack(side=LEFT)
+
+    uzkeo_btn = Checkbutton(options2_frame, text='Úzke "o" všade',
+                            variable=uzkeo, command=uzkeo_btn_cback)
+    uzkeo_btn.select()
+    uzkeo_btn.pack(side=LEFT)
+
     hline = Frame(tk, height=1, width=520, bg="black")
     hline.pack()
     labelout = Label(tk, text='Výstupný text')
     labelout.pack()
     textout = Text(tk, width=80, height=15, font=('Arial', 10))
     textout.pack()
-    labelver = Label(tk, text='v0.9.2')
+    labelver = Label(tk, text='v0.9.3')
     labelver.pack(side=RIGHT)
     tk.mainloop()
 else:
@@ -273,7 +335,8 @@ else:
     else:
         retazec = open(args.f[0]).read()
 
-    retazec = convert(retazec, dotahovat=args.d, zarovnat=args.a)
+    retazec = convert(retazec, dotahovat=args.d, zarovnat=args.a,
+                      ceske_p=args.p, uzke_o=args.u, sluckove_z=args.z)
 
     if not args.o:
         print(retazec)
