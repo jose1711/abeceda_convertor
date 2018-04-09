@@ -37,7 +37,7 @@ Zoznam a vyznam specialnych znakov:
 ŉ - medzera pred malymi pismenami s bruskom a P na zaciatku riadku
 & - dotahova ciarka za koncom slova
 ¤ - vseobecna spojka
-× - spojka za P
+Ŋ - spojka za P
 ß - nabehova ciarka pred malymi pismenami
 © - prehnuta nabehova ciarka pred malymi pismenami
 ÷ - nabehova ciarka pred x
@@ -96,7 +96,8 @@ sirokes2 = 's¤'
 sirokess2 = 'š¤'
 sirokes3 = 'đ¤'
 sirokess3 = 'Đ¤'
-znaky = '- \n\xa0\r\x0b\t0123456789\.,:;?!+*/<=>\()\[\]{}\\\'`"“”„–'
+sirokess4 = 'ś¤'
+znaky = '- \n\xa0\r\x0b\t0123456789\.,:;?!+*/<=>\()\[\]{}\\\'`"“”„–_'
 dotiahni = ''
 dotiahni += 'aáäąbcčćdďeéěęfghiíjklľĺłmnňńoóöőôpqrřŕtťżuúůüűvwxyýzžź'
 dotiahni += 'AÁÄĄCČĆEÉĚĘGHJKLĽĹŁMNŇŃQRŘŔUÚŮÜŰXYÝZŽŹĆ'
@@ -119,7 +120,7 @@ nahrady_o = {'o': '‹',
              'ô': 'ŏ',
              chr(148): 'ō',
              chr(139): 'Ō',
-            }
+             }
 
 # velke osamotene pismena
 rvelke = re.compile('[{0}](?![{1}]|$)'.format(velke, znaky))
@@ -154,9 +155,10 @@ rsirokes_znak = re.compile('({0}|{1})(?=[{2}])'.format(sirokes2,
                                                        znaky))
 
 # siroke š + obecna spojka a za nim znak
-rsirokess_znak = re.compile('({0}|{1})(?=[{2}])'.format(sirokess2,
-                                                        sirokess3,
-                                                        znaky))
+rsirokess_znak = re.compile('({0}|{1}|{2})(?=[{3}])'.format(sirokess2,
+                                                            sirokess3,
+                                                            sirokess4,
+                                                            znaky))
 
 # kombinacie gs, js, qs, ys na konci slov
 rgsjs = re.compile('[{0}]s(?=[{1}])'.format(gsjs, znaky))
@@ -173,6 +175,9 @@ rssnssv = re.compile('({0}|{1})([nv])'.format(sirokess2, sirokess3))
 # obecna spojka medzi zavinac a pismena, ktore ju bezne nepotrebuju
 rzavinacove_male = re.compile('@(?=[{0}])'.format(zavinacove_male))
 
+# nabehova ciarka medzi podciarkovnikom a malym zavinacovym pismenom
+rzavinacove_male_podciarkovnik = re.compile('_(?=[{0}])'.format(zavinacove_male))
+
 rdotiahni = re.compile('([{0}])(?=[{1}])'.format(dotiahni,
                                                  znaky))
 
@@ -186,7 +191,7 @@ rmale_bruskate = re.compile('( |^)([{0}])'.format(male_bruskate + 'P'), re.M)
 def convert(retazec, dotahovat=False, zarovnat=False, ceske_p=False,
             sluckove_z=False, uzke_o=False):
     retazec = re.sub(rvelke, lambda n: n.group(0) + '¤', retazec)
-    retazec = re.sub(rP, lambda n: n.group(0) + '×', retazec)
+    retazec = re.sub(rP, lambda n: n.group(0) + 'Ŋ', retazec)
     retazec = re.sub(rmale1, lambda n: n.group(1) + 'ß', retazec)
     retazec = re.sub(rmale2, lambda n: n.group(1) + '©', retazec)
     retazec = re.sub(rs, lambda n: n.group(0) + '¤', retazec)
@@ -202,6 +207,7 @@ def convert(retazec, dotahovat=False, zarovnat=False, ceske_p=False,
     retazec = re.sub(rssnssv, lambda n: n.group(1)[:-1] + '¨' + n.group(2), retazec)
     retazec = re.sub('([boóôövw])(?=[mnňvwyýzž])', lambda n: nahrady[n.group(1)], retazec)
     retazec = re.sub(rzavinacove_male, '@¤', retazec)
+    # retazec = re.sub(rzavinacove_male_podciarkovnik, '_ß', retazec)
     retazec = re.sub('@s', '@đ', retazec)
     if dotahovat:
         retazec = re.sub(rdotiahni, lambda n: n.group(0) + '&', retazec)
@@ -324,7 +330,7 @@ if args.g:
     labelout.pack()
     textout = Text(tk, width=80, height=15, font=('Arial', 10))
     textout.pack()
-    labelver = Label(tk, text='v0.9.3')
+    labelver = Label(tk, text='v0.9.4')
     labelver.pack(side=RIGHT)
     tk.mainloop()
 else:
