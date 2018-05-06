@@ -22,7 +22,7 @@ Pouzitie:
  -o vystupny_subor  Súbor, kam pôjde výstup (nedefinovaný = obrazovka)
  -p                 Použiť české p
  -u                 Použiť všade úzke o
- -z                 Zmeniť z za sľučkové
+ -z                 Zmeniť z za slučkové
 
 Ak nie je zadany vstupny subor ani rezim GUI, je pouzity standardny
 vstup.
@@ -74,7 +74,7 @@ parser.add_argument('-p', action='store_true',
 parser.add_argument('-u', action='store_true',
                     help='Vždy použiť úzke o')
 parser.add_argument('-z', action='store_true',
-                    help='Zmeniť z za sľučkové')
+                    help='Zmeniť z za slučkové')
 args = parser.parse_args()
 # vo Windows vzdy zobraz okno
 if os.name == 'nt':
@@ -314,7 +314,7 @@ if args.g:
     ceskep_btn.deselect()
     ceskep_btn.pack(side=LEFT)
 
-    zluckovez_btn = Checkbutton(options2_frame, text='Sľučkové "z"',
+    zluckovez_btn = Checkbutton(options2_frame, text='Slučkové "z"',
                                 variable=sluckovez, command=sluckovez_btn_cback)
     zluckovez_btn.select()
     zluckovez_btn.pack(side=LEFT)
@@ -330,7 +330,7 @@ if args.g:
     labelout.pack()
     textout = Text(tk, width=80, height=15, font=('Arial', 10))
     textout.pack()
-    labelver = Label(tk, text='v0.9.4')
+    labelver = Label(tk, text='v0.9.5')
     labelver.pack(side=RIGHT)
     tk.mainloop()
 else:
